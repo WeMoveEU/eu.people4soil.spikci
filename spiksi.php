@@ -130,3 +130,32 @@ function spiksi_civicrm_speakciviParams(&$params) {
     CRM_Core_Error::debug_var('$params empty', $params);
   }
 }
+
+function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($objectName == 'Individual' && $op == 'create') {
+    // todo prepare params for speakcivi like this below
+    $param = (object)array(
+      'action_type' => 'petition',
+      'action_technical_type' => 'people4soil.eu:contact',
+      'create_dt' => '2016-03-22T12:40:12.531Z', // todo set created date of contact
+      'action_name' => 'create-contact',
+      'external_id' => 1, // todo set campaign
+      'cons_hash' => (object)array(
+        'firstname' => $objectRef->first_name,
+        'lastname' => $objectRef->last_name,
+        'emails' => array(
+          0 => (object)array(
+            'email' => 'email@example.com', // todo get by api
+          )
+        ),
+        'addresses' => array(
+          0 => (object)array(
+            'country' => 'it', // todo get by api
+          ),
+        ),
+      ),
+    );
+
+    // todo call speakcivi endpoint by curl with params in $_POST
+  }
+}
