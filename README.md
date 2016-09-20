@@ -1,3 +1,3 @@
 # Spiksi
 
-Integration between [speakcivi](github.com/WeMoveEU/speakcivi) and CiviCRM.
+Integration between [speakcivi](https://github.com/WeMoveEU/speakcivi) and CiviCRM.
