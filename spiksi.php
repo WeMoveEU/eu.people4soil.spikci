@@ -138,7 +138,7 @@ function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     if ($objectRef->activity_type_id == $registrationActivityTypeId) {
 
       /* Assumptions: civicrm_activity.campaign_id = civicrm_campaign.external_identifier */
-      $externalId = $objectRef->campaing_id;
+      $externalId = $objectRef->campaign_id;
 
       $params = array(
         1 => array($objectId, 'Integer'),
