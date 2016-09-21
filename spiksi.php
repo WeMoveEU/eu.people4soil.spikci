@@ -147,14 +147,9 @@ function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     $contact = CRM_Core_DAO::executeQuery($query, $params);
     $contact->fetch();
 
-    $query = "SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1";
-    $email = CRM_Core_DAO::singleValueQuery($query, $params);
-
-    $query = "SELECT c.iso_code
-              FROM civicrm_address a JOIN civicrm_country c ON c.id = a.country_id
-              WHERE a.contact_id = %1 AND a.is_primary = 1";
-    $country = CRM_Core_DAO::singleValueQuery($query, $params);
-
+    // fixme There is not possible to get email or country on this step because they don't exist yet!
+    $email = '';
+    $country = '';
 
     CRM_Core_Error::debug_var('$objectRef', $objectRef);
     $param = (object)array(
