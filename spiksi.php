@@ -151,8 +151,9 @@ function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         $contactParams = array(
           1 => array($contactId, 'Integer'),
         );
-        $query = 'SELECT created_date FROM civicrm_contact c WHERE c.id = %1';
-        $createdDate = CRM_Core_DAO::singleValueQuery($query, $contactParams);
+        $query = 'SELECT created_date, first_name, last_name FROM civicrm_contact c WHERE c.id = %1';
+        $contact = CRM_Core_DAO::executeQuery($query, $contactParams);
+        $contact->fetch();
 
         $query = "SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1";
         $email = CRM_Core_DAO::singleValueQuery($query, $contactParams);
@@ -166,12 +167,12 @@ function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         $param = (object)array(
           'action_type' => 'petition',
           'action_technical_type' => 'people4soil.eu:register',
-          'create_dt' => $createdDate,
+          'create_dt' => $contact->created_date,
           'action_name' => 'create-contact',
           'external_id' => $externalId,
           'cons_hash' => (object)array(
-            'firstname' => $objectRef->first_name,
-            'lastname' => $objectRef->last_name,
+            'firstname' => $contact->first_name,
+            'lastname' => $contact->last_name,
             'emails' => array(
               0 => (object)array(
                 'email' => $email,
