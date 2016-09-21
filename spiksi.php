@@ -163,7 +163,6 @@ function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
               WHERE a.contact_id = %1 AND a.is_primary = 1";
         $country = CRM_Core_DAO::singleValueQuery($query, $contactParams);
 
-        CRM_Core_Error::debug_var('$objectRef', $objectRef);
         $param = (object)array(
           'action_type' => 'petition',
           'action_technical_type' => 'people4soil.eu:register',
@@ -186,7 +185,6 @@ function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
             ),
           ),
         );
-        CRM_Core_Error::debug_var('$param spiksi_civicrm_post', $param);
 
         $speakcivi = new CRM_Speakcivi_Page_Speakcivi();
         $speakcivi->runParam($param);
