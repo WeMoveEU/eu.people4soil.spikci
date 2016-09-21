@@ -188,7 +188,8 @@ function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         );
         CRM_Core_Error::debug_var('$param spiksi_civicrm_post', $param);
 
-        // todo call speakcivi endpoint by curl with params in $_POST
+        $speakcivi = new CRM_Speakcivi_Page_Speakcivi();
+        $speakcivi->runParam($param);
       }
     }
   }
