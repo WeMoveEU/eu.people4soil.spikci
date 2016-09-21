@@ -133,28 +133,53 @@ function spiksi_civicrm_speakciviParams(&$params) {
 
 function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($objectName == 'Individual' && $op == 'create') {
-    // todo prepare params for speakcivi like this below
+
+    /* Assumptions: civicrm_campaign.id = civicrm_campaign.external_identifier */
+    $sourceCampaignExternalIdMap = array(
+      'speakciviform #1' => 1, /* Register on english newsletter-EN */
+    );
+
+    $params = array(
+      1 => array($objectId, 'Integer'),
+    );
+
+    $query = 'SELECT id, created_date FROM civicrm_contact c WHERE c.id = %1';
+    $contact = CRM_Core_DAO::executeQuery($query, $params);
+    $contact->fetch();
+
+    $query = "SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1";
+    $email = CRM_Core_DAO::singleValueQuery($query, $params);
+
+    $query = "SELECT c.iso_code
+              FROM civicrm_address a JOIN civicrm_country c ON c.id = a.country_id
+              WHERE a.contact_id = %1 AND a.is_primary = 1";
+    $country = CRM_Core_DAO::singleValueQuery($query, $params);
+
+
+    CRM_Core_Error::debug_var('$objectRef', $objectRef);
     $param = (object)array(
       'action_type' => 'petition',
-      'action_technical_type' => 'people4soil.eu:contact',
-      'create_dt' => '2016-03-22T12:40:12.531Z', // todo set created date of contact
+      'action_technical_type' => 'people4soil.eu:register',
+      'create_dt' => $contact->created_date,
       'action_name' => 'create-contact',
-      'external_id' => 1, // todo set campaign
+      'external_id' => $sourceCampaignExternalIdMap[$objectRef->source],
       'cons_hash' => (object)array(
         'firstname' => $objectRef->first_name,
         'lastname' => $objectRef->last_name,
         'emails' => array(
           0 => (object)array(
-            'email' => 'email@example.com', // todo get by api
+            'email' => $email,
           )
         ),
         'addresses' => array(
           0 => (object)array(
-            'country' => 'it', // todo get by api
+            'zip' => '['.$country.']',
+            'country' => $country,
           ),
         ),
       ),
     );
+    CRM_Core_Error::debug_var('$param spiksi_civicrm_post', $param);
 
     // todo call speakcivi endpoint by curl with params in $_POST
   }
