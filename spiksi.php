@@ -132,50 +132,63 @@ function spiksi_civicrm_speakciviParams(&$params) {
 }
 
 function spiksi_civicrm_post($op, $objectName, $objectId, &$objectRef) {
-  if ($objectName == 'Individual' && $op == 'create') {
+  if ($objectName == 'Activity' && $op == 'create') {
+    // todo move to settings
+    $registrationActivityTypeId = 55;
+    if ($objectRef->activity_type_id == $registrationActivityTypeId) {
 
-    /* Assumptions: civicrm_campaign.id = civicrm_campaign.external_identifier */
-    $sourceCampaignExternalIdMap = array(
-      'speakciviform #1' => 1, /* Register on english newsletter-EN */
-    );
+      /* Assumptions: civicrm_activity.campaign_id = civicrm_campaign.external_identifier */
+      $externalId = $objectRef->campaing_id;
 
-    $params = array(
-      1 => array($objectId, 'Integer'),
-    );
+      $params = array(
+        1 => array($objectId, 'Integer'),
+      );
+      $query = "SELECT contact_id
+                FROM civicrm_activity_contact
+                WHERE activity_id = %1 AND record_type_id = 3";
+      $contactId = CRM_Core_DAO::singleValueQuery($query, $params);
+      if ($contactId) {
+        $contactParams = array(
+          1 => array($contactId, 'Integer'),
+        );
+        $query = 'SELECT created_date FROM civicrm_contact c WHERE c.id = %1';
+        $createdDate = CRM_Core_DAO::singleValueQuery($query, $contactParams);
 
-    $query = 'SELECT id, created_date FROM civicrm_contact c WHERE c.id = %1';
-    $contact = CRM_Core_DAO::executeQuery($query, $params);
-    $contact->fetch();
+        $query = "SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1";
+        $email = CRM_Core_DAO::singleValueQuery($query, $contactParams);
 
-    // fixme There is not possible to get email or country on this step because they don't exist yet!
-    $email = '';
-    $country = '';
+        $query = "SELECT c.iso_code
+              FROM civicrm_address a JOIN civicrm_country c ON c.id = a.country_id
+              WHERE a.contact_id = %1 AND a.is_primary = 1";
+        $country = CRM_Core_DAO::singleValueQuery($query, $contactParams);
 
-    CRM_Core_Error::debug_var('$objectRef', $objectRef);
-    $param = (object)array(
-      'action_type' => 'petition',
-      'action_technical_type' => 'people4soil.eu:register',
-      'create_dt' => $contact->created_date,
-      'action_name' => 'create-contact',
-      'external_id' => $sourceCampaignExternalIdMap[$objectRef->source],
-      'cons_hash' => (object)array(
-        'firstname' => $objectRef->first_name,
-        'lastname' => $objectRef->last_name,
-        'emails' => array(
-          0 => (object)array(
-            'email' => $email,
-          )
-        ),
-        'addresses' => array(
-          0 => (object)array(
-            'zip' => '['.$country.']',
-            'country' => $country,
+        CRM_Core_Error::debug_var('$objectRef', $objectRef);
+        $param = (object)array(
+          'action_type' => 'petition',
+          'action_technical_type' => 'people4soil.eu:register',
+          'create_dt' => $createdDate,
+          'action_name' => 'create-contact',
+          'external_id' => $externalId,
+          'cons_hash' => (object)array(
+            'firstname' => $objectRef->first_name,
+            'lastname' => $objectRef->last_name,
+            'emails' => array(
+              0 => (object)array(
+                'email' => $email,
+              )
+            ),
+            'addresses' => array(
+              0 => (object)array(
+                'zip' => '['.$country.']',
+                'country' => $country,
+              ),
+            ),
           ),
-        ),
-      ),
-    );
-    CRM_Core_Error::debug_var('$param spiksi_civicrm_post', $param);
+        );
+        CRM_Core_Error::debug_var('$param spiksi_civicrm_post', $param);
 
-    // todo call speakcivi endpoint by curl with params in $_POST
+        // todo call speakcivi endpoint by curl with params in $_POST
+      }
+    }
   }
 }
